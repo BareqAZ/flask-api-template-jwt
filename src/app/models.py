@@ -28,7 +28,6 @@ class User(Base):
     email = db.Column(db.String, nullable=False, unique=True)
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
-    api_key = db.Column(db.String(), unique=True)
     hashed_api_key = db.Column(db.String(150), nullable=False)
 
     def __init__(self, **kwargs) -> None:

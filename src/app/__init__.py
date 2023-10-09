@@ -77,7 +77,6 @@ def create_app(database_uri=settings["general"]["sqlite_database_uri"]):
 
         if User.query.count() == 0:
             log.info("No users found, creating the initial superuser")
-            superuser_username = settings["general"]["superuser_username"]
             superuser_api_key = settings["general"]["superuser_api_key"]
 
             admin_user = User(
@@ -91,7 +90,7 @@ def create_app(database_uri=settings["general"]["sqlite_database_uri"]):
             try:
                 db.session.add(admin_user)
                 db.session.commit()
-                log.info(f'Superuser account "{superuser_username}" has been created')
+                log.info(f'Superuser account "{admin_user.email}" has been created')
             except SQLAlchemyError as err:
                 log.info("Failed creating the initial superuser, database err: %s", err)
 

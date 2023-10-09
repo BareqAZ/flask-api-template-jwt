@@ -2,4 +2,4 @@ from flask import Blueprint
 
 auth = Blueprint("auth", __name__)
 
-from app.v1.auth import routes
+from app.v1.auth import routes  # noqa: F401, E402

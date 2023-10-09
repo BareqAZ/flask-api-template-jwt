@@ -5,14 +5,11 @@ debug               = false
 # This secret key is used to encrypt Flask session and JWT tokens.
 secret_key          = "dev-env"
 
-# JWT access token expiration time in seconds.
+# JWT access token expiration time. (in seconds)
 jwt_expiration      = 300
 
-# When there are no users (when starting the project for the first time) a superuser account is created.
-# The following credentials are used for creating the initial superuser account.
-superuser_username  = "superuser"
-
-# Leave empty to automatically generate one.
+# When starting the application for the first time a superuser account is created.
+# The following API key is given to the superuser account.
 superuser_api_key   = 'superuser'
 
 # The IP address on which the application will listen.
