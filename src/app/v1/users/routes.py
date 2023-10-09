@@ -1,7 +1,3 @@
-# Python imports
-import hashlib
-import uuid
-
 # Flask imports
 from flask import jsonify, request, url_for
 
@@ -90,17 +86,19 @@ def create_user():
     if user:
         return jsonify({"error": "user already exists"}), 400
 
-    new_api_key = data.get("api_key", str(uuid.uuid4()))
-    new_api_key_hashed = hashlib.sha256(new_api_key.encode("utf-8")).hexdigest()
-
     new_user = User(
         first_name=first_name,
         last_name=last_name,
         email=email,
-        hashed_api_key=new_api_key_hashed,
         is_active=data.get("is_active", True),
         is_admin=data.get("is_admin", False),
     )
+
+    if data.get("api_key"):
+        new_user_api_key = data.get("api_key")
+        new_user.set_api_key(new_user_api_key)
+    else:
+        new_user_api_key = new_user.gen_api_key()
 
     try:
         db.session.add(new_user)
@@ -115,7 +113,7 @@ def create_user():
                     "email": new_user.email,
                     "is_active": new_user.is_active,
                     "is_admin": new_user.is_admin,
-                    "api_key": new_api_key,
+                    "api_key": new_user_api_key,
                 }
             ),
             201,
@@ -196,7 +194,7 @@ def modify_user(user_id):
 
     new_api_key = data.get("api_key")
     if new_api_key:
-        user.hashed_api_key = hashlib.sha256(new_api_key.encode("utf-8")).hexdigest()
+        user.set_api_key(new_api_key)
 
     user.first_name = data.get("first_name", user.first_name)
     user.last_name = data.get("last_name", user.last_name)
@@ -248,8 +246,7 @@ def gen_user_api_key(user_id):
     if not user:
         return jsonify({"error": "User not found!"}), 404
 
-    new_api_key = str(uuid.uuid4())
-    user.hashed_api_key = hashlib.sha256(new_api_key.encode("utf-8")).hexdigest()
+    user_new_api_key = user.gen_api_key()
 
     try:
         db.session.commit()
@@ -260,7 +257,7 @@ def gen_user_api_key(user_id):
                     "message": "New API key has been generated, "
                     "be sure to save this now. "
                     "It cannot be recovered once lost!",
-                    "api_key": new_api_key,
+                    "api_key": user_new_api_key,
                 }
             ),
             200,

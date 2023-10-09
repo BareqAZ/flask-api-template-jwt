@@ -1,4 +1,3 @@
-import hashlib
 import pytest
 import os
 import sys
@@ -7,8 +6,17 @@ from app import create_app, db
 from app.models import User
 
 users = {
-        'admin' : {'first_name': 'admin', 'last_name': 'admin', 'email': 'admin@local', 'is_admin': True, 'api_key': 'admin_api_key'},
-        'user' :  {'first_name': 'user', 'last_name': 'user', 'email': 'user@local', 'is_admin': False, 'api_key': 'user_api_key'},
+        'admin' : {'first_name': 'admin',
+                   'last_name': 'admin',
+                   'email': 'admin@local',
+                   'is_admin': True,
+                   'api_key': 'admin_api_key'},
+
+        'user' :  {'first_name': 'user',
+                   'last_name': 'user',
+                   'email': 'user@local',
+                   'is_admin': False,
+                   'api_key': 'user_api_key'},
         }
 
 @pytest.fixture()
@@ -17,17 +25,13 @@ def app():
     with app.app_context():
         db.create_all()
 
-
         for user in users.values():
-            api_key = user['api_key']
-            hashed_api_key = hashlib.sha256(api_key.encode('utf-8')).hexdigest()
             new_user =  User(first_name=user['first_name'],
                              last_name=user['last_name'],
                             email=user['email'],
                             is_admin=user['is_admin'],
-                            hashed_api_key=hashed_api_key
                         )
-
+            new_user.set_api_key(user['api_key'])
             db.session.add(new_user)
             db.session.commit()
     yield app

@@ -294,7 +294,23 @@ def test_user_lifetime(client):
     resp = client.get(f'/api/v1/check', headers=headers_new_user)
     assert resp.status_code == 403
 
-    headers_new_user  = {'Authorization': f'Bearer {user_api_key}', 
+    headers_new_user  = {'Authorization': f'Bearer {user_api_key}',
+                         'Content-Type': 'application/json'}
+
+    # Check new key access
+    resp = client.get(f'/api/v1/check', headers=headers_new_user)
+    assert resp.status_code == 200
+
+    # Update user API key manually
+    user_api_key = 'This-Is-Test-Key'
+    resp = client.patch(f'/api/v1/users/{user_id}', headers=headers_admin, data=json.dumps({'api_key': user_api_key}))
+    assert resp.status_code == 200
+
+    # Check old key access
+    resp = client.get(f'/api/v1/check', headers=headers_new_user)
+    assert resp.status_code == 403
+
+    headers_new_user  = {'Authorization': f'Bearer {user_api_key}',
                          'Content-Type': 'application/json'}
 
     # Check new key access

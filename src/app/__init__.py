@@ -1,5 +1,4 @@
 # Python imports
-import hashlib
 import logging
 import logging.handlers
 import os
@@ -70,15 +69,14 @@ def create_app(database_uri=settings["general"]["sqlite_database_uri"]):
             log.info("No users found, creating the initial superuser")
             superuser_username = settings["general"]["superuser_username"]
             superuser_api_key = settings["general"]["superuser_api_key"]
-            hashed_api_key = hashlib.sha256(
-                superuser_api_key.encode("utf-8")
-            ).hexdigest()
 
             admin_user = User(
                 email="superuser@localhost",
                 is_admin=True,
-                hashed_api_key=hashed_api_key if superuser_api_key else None,
             )
+
+            if superuser_api_key:
+                admin_user.set_api_key(superuser_api_key)
 
             try:
                 db.session.add(admin_user)
