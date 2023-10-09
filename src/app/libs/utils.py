@@ -32,6 +32,14 @@ def validate_email(email: str) -> bool:
     return bool(email_pattern.match(email))
 
 
+def get_api_user() -> Optional[User]:
+    """
+    A wrapper around _get_api_user() for cleaner usability.
+    This will either return a user or None.
+    """
+    return _get_api_user()[0]
+
+
 def api_key_required(f: Callable) -> Callable:
     """
     Simple API login required decorator
@@ -40,7 +48,7 @@ def api_key_required(f: Callable) -> Callable:
 
     @wraps(f)
     def decorator(*args, **kwargs):
-        _, error_message, error_code = get_api_user()
+        _, error_message, error_code = _get_api_user()
         if error_message:
             return jsonify({"error": error_message}), error_code
 
@@ -61,7 +69,7 @@ def admin_required(f: Callable) -> Callable:
 
     @wraps(f)
     def decorator(*args, **kwargs):
-        user, _, _ = get_api_user()
+        user, _, _ = _get_api_user()
         if user and user.is_admin:
             return f(*args, **kwargs)
         else:
@@ -90,7 +98,7 @@ def get_source_addr() -> str:
         return request.remote_addr or "127.0.0.1"
 
 
-def get_api_user() -> Tuple[Optional[User], Optional[str], Optional[int]]:
+def _get_api_user() -> Tuple[Optional[User], Optional[str], Optional[int]]:
     """
     This function validates the authorization token then returns
     the user database object if valid.
