@@ -6,6 +6,7 @@ from typing import Callable, Optional, Tuple
 
 # Flask imports
 from flask import abort, jsonify, request
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 # Local imports
 from app import log
@@ -34,10 +35,16 @@ def validate_email(email: str) -> bool:
 
 def get_api_user() -> Optional[User]:
     """
-    A wrapper around _get_api_user() for cleaner usability.
     This will either return a user or None.
+    Works for both JWT and normal API users.
     """
-    return _get_api_user()[0]
+    if _get_api_user()[0]:
+        return _get_api_user()[0]
+
+    if verify_jwt_in_request():
+        user = User.query.filter(User.id == get_jwt_identity()).first()
+        if user:
+            return user
 
 
 def api_key_required(f: Callable) -> Callable:
@@ -69,11 +76,10 @@ def admin_required(f: Callable) -> Callable:
 
     @wraps(f)
     def decorator(*args, **kwargs):
-        user, _, _ = _get_api_user()
+        user = get_api_user()
         if user and user.is_admin:
             return f(*args, **kwargs)
-        else:
-            abort(403)
+        abort(403)
 
     return decorator
 

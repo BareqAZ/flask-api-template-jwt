@@ -9,6 +9,7 @@ import toml
 
 # Flask imports
 from flask import Flask, jsonify
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
@@ -48,17 +49,26 @@ if sys.stdout.isatty():
 # Init database lib
 db = SQLAlchemy()
 
+# Init JWT lib
+jwt = JWTManager()
+
 
 def create_app(database_uri=settings["general"]["sqlite_database_uri"]):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = settings["general"]["secret_key"]
     app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
+    app.config["JWT_SECRET_KEY"] = settings["general"]["secret_key"]
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = settings["general"]["jwt_expiration"]
+    app.config["JWT_ERROR_MESSAGE_KEY"] = "error"
     db.init_app(app)
+    jwt.init_app(app)
 
+    from app.v1.auth import auth
     from app.v1.check import check
     from app.v1.users import users
 
     app.register_blueprint(check, url_prefix="/api/v1")
+    app.register_blueprint(auth, url_prefix="/api/v1")
     app.register_blueprint(users, url_prefix="/api/v1/users")
 
     with app.app_context():
