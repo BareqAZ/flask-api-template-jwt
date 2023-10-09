@@ -1,0 +1,26 @@
+[general]
+# Determines whether debug logging is enabled (true/false).
+debug               = false
+
+# Flask uses this secret key to securely sign cookies.
+secret_key          = "dev-env"
+
+# When there are no users (when starting the project for the first time) a superuser account is created.
+# The following credentials are used for creating the initial superuser account.
+superuser_username  = "superuser"
+superuser_password  = "superuser"
+
+# Leave empty to automatically generate one
+superuser_api_key   = 'superuser'
+
+# The IP address on which the application will listen.
+# It's recommended to keep this as is and use a proxy server such as Nginx to handle the public requests.
+listen_address      = "127.0.0.1"
+
+# The port on which the application will listen.
+listen_port         = 5000
+
+# SQLite database URI
+# This 'sqlite://' creates an in-memory temporary sqlite database
+# Change this URI to a local file path for a persistent database.
+sqlite_database_uri = 'sqlite://'
